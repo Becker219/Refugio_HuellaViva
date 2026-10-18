@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd"
+              name="reporte_adopciones" pageWidth="595" pageHeight="842" columnWidth="555"
+              leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20">
+
+    <parameter name="TITULO_INSTITUCION" class="java.lang.String"/>
+
+    <queryString>
+        <![CDATA[
+        SELECT 
+            a.num_acta AS numActa,
+            DATE_FORMAT(a.fecha_adopcion, '%d/%m/%Y %H:%i') AS fechaAdopcion,
+            m.codigo_interno AS codigoMascota,
+            m.nombre AS nombreMascota,
+            e.descripcion AS especie,
+            CONCAT(ad.nombres, ' ', ad.apellidos) AS nombreAdoptante,
+            ad.dni AS dniAdoptante,
+            ad.telefono AS telefonoAdoptante,
+            u.nombre_completo AS responsable
+        FROM tb_acta_adopcion a
+        INNER JOIN tb_mascota m ON a.id_mascota = m.id_mascota
+        INNER JOIN tb_especie e ON m.id_especie = e.id_especie
+        INNER JOIN tb_adoptante ad ON a.id_adoptante = ad.id_adoptante
+        INNER JOIN tb_usuario u ON a.id_usuario = u.id_usuario
+        ORDER BY a.id_adopcion DESC
+        ]]>
+    </queryString>
+
+    <field name="numActa" class="java.lang.String"/>
+    <field name="fechaAdopcion" class="java.lang.String"/>
+    <field name="codigoMascota" class="java.lang.String"/>
+    <field name="nombreMascota" class="java.lang.String"/>
+    <field name="especie" class="java.lang.String"/>
+    <field name="nombreAdoptante" class="java.lang.String"/>
+    <field name="dniAdoptante" class="java.lang.String"/>
+    <field name="telefonoAdoptante" class="java.lang.String"/>
+    <field name="responsable" class="java.lang.String"/>
+
+    <title>
+        <band height="75">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="65" backcolor="#198754"/>
+                <graphicElement><pen lineWidth="0.0"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="15" y="10" width="525" height="25" forecolor="#FFFFFF"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="16" isBold="true"/>
+                </textElement>
+                <text><![CDATA[REPORTE OFICIAL DE ACTAS DE ADOPCIÓN Y TRAZABILIDAD]]></text>
+            </staticText>
+            <textField>
+                <reportElement x="15" y="36" width="525" height="20" forecolor="#E0F2E9"/>
+                <textElement verticalAlignment="Middle">
+                    <font fontName="SansSerif" size="10"/>
+                </textElement>
+                <textFieldExpression><![CDATA[$P{TITULO_INSTITUCION}]]></textFieldExpression>
+            </textField>
+        </band>
+    </title>
+
+    <columnHeader>
+        <band height="28">
+            <rectangle>
+                <reportElement x="0" y="0" width="555" height="25" backcolor="#D1E7DD"/>
+                <graphicElement><pen lineWidth="0.5" lineColor="#A3CFBB"/></graphicElement>
+            </rectangle>
+            <staticText>
+                <reportElement x="4" y="0" width="62" height="25"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[N° ACTA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="70" y="0" width="68" height="25"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[FECHA]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="142" y="0" width="82" height="25"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[MASCOTA (ESPECIE)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="228" y="0" width="142" height="25"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[ADOPTANTE (DNI)]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="386" y="0" width="58" height="25"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[TELÉFONO]]></text>
+            </staticText>
+            <staticText>
+                <reportElement x="450" y="0" width="101" height="25"/>
+                <textElement verticalAlignment="Middle"><font size="8" isBold="true"/></textElement>
+                <text><![CDATA[REGISTRADO POR]]></text>
+            </staticText>
+        </band>
+    </columnHeader>
+
+    <detail>
+        <band height="28">
+            <line>
+                <reportElement positionType="FixRelativeToBottom" x="0" y="27" width="555" height="1" forecolor="#E0E0E0"/>
+            </line>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="4" y="4" width="62" height="18"/>
+                <textElement verticalAlignment="Top"><font size="8" isBold="true"/></textElement>
+                <textFieldExpression><![CDATA[$F{numActa}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="70" y="4" width="68" height="18"/>
+                <textElement verticalAlignment="Top"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{fechaAdopcion}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="142" y="4" width="82" height="18"/>
+                <textElement verticalAlignment="Top"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{nombreMascota} + " (" + $F{especie} + ")"]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="228" y="4" width="142" height="18"/>
+                <textElement verticalAlignment="Top"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{nombreAdoptante} + " (" + $F{dniAdoptante} + ")"]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="386" y="4" width="58" height="18"/>
+                <textElement verticalAlignment="Top"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{telefonoAdoptante}]]></textFieldExpression>
+            </textField>
+            <textField textAdjust="StretchHeight">
+                <reportElement x="450" y="4" width="101" height="18"/>
+                <textElement verticalAlignment="Top"><font size="8"/></textElement>
+                <textFieldExpression><![CDATA[$F{responsable}]]></textFieldExpression>
+            </textField>
+        </band>
+    </detail>
+
+    <pageFooter>
+        <band height="30">
+            <textField>
+                <reportElement x="0" y="10" width="555" height="15" forecolor="#6C757D"/>
+                <textElement textAlignment="Right" verticalAlignment="Middle">
+                    <font size="8"/>
+                </textElement>
+                <textFieldExpression><![CDATA["Página " + $V{PAGE_NUMBER} + " - Generado por Refugio Huella Viva"]]></textFieldExpression>
+            </textField>
+        </band>
+    </pageFooter>
+</jasperReport>

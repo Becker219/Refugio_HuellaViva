@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Formalizar Adopción (Transacción) - Huella Viva</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{menu :: navbar}"></div>
+
+<div class="container py-4">
+    <h4 class="fw-bold text-success mb-3">
+        <i class="bi bi-clipboard2-check-fill me-2"></i>Formalización de Adopción y Entrega de Kit Sanitario (Transacción)
+    </h4>
+
+    <div th:if="${exito}" class="alert alert-success alert-dismissible fade show py-2">
+        <i class="bi bi-check-circle-fill me-1"></i> <span th:text="${exito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show py-2">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i> <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Paso 1: Armar Kit Sanitario de Salida (Detalle) -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-primary text-white fw-semibold rounded-top-4">
+                    1. Armar Kit Sanitario de Salida (Descuento de Stock)
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/adopciones/agregar-insumo}" method="post" class="row g-2 align-items-end mb-3">
+                        <div class="col-8">
+                            <label class="form-label small fw-semibold">Insumo Médico / Alimento</label>
+                            <select name="idInsumo" class="form-select form-select-sm" required>
+                                <option value="">-- Seleccione Insumo --</option>
+                                <option th:each="ins : ${insumosDisponibles}" 
+                                        th:value="${ins.idInsumo}" 
+                                        th:text="${ins.descripcion + ' (Stock: ' + ins.stockActual + ')'}"></option>
+                            </select>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label small fw-semibold">Cantidad</label>
+                            <div class="input-group input-group-sm">
+                                <input type="number" name="cantidad" class="form-control" value="1" min="1" required>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered align-middle small mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Insumo</th>
+                                    <th class="text-center">Cant.</th>
+                                    <th>Costo Ref.</th>
+                                    <th class="text-center">Quitar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="item, stat : ${carritoKit}">
+                                    <td th:text="${item.insumo.descripcion}"></td>
+                                    <td class="text-center fw-bold" th:text="${item.cantidad}"></td>
+                                    <td th:text="${'S/ ' + item.costoReferencial}"></td>
+                                    <td class="text-center">
+                                        <a th:href="@{/adopciones/quitar-insumo/{idx}(idx=${stat.index})}" class="text-danger">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(carritoKit)}">
+                                    <td colspan="4" class="text-center text-muted py-3">
+                                        Agregue insumos preventivos al kit antes de grabar.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paso 2: Cabecera del Acta de Adopción -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 h-100">
+                <div class="card-header bg-success text-white fw-semibold rounded-top-4">
+                    2. Datos del Acta de Adopción y Compromiso de Seguimiento
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/adopciones/registrar}" method="post">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">N° de Acta Oficial</label>
+                                <input type="text" name="numActa" th:value="${numActaSugerido}" class="form-control form-control-sm fw-bold bg-light" readonly required>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold">Animal Rescatado (Solo estado APTO_ADOPCION)</label>
+                                <select name="idMascota" class="form-select form-select-sm" required>
+                                    <option value="">-- Seleccione Mascota --</option>
+                                    <option th:each="m : ${mascotasAptas}" 
+                                            th:value="${m.idMascota}" 
+                                            th:text="${m.codigoInterno + ' - ' + m.nombre + ' (' + m.especie.descripcion + ')'}"></option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Adoptante Evaluado (Solo estado APTO)</label>
+                            <select name="idAdoptante" class="form-select form-select-sm" required>
+                                <option value="">-- Seleccione Adoptante --</option>
+                                <option th:each="a : ${adoptantesAptos}" 
+                                        th:value="${a.idAdoptante}" 
+                                        th:text="${a.dni + ' - ' + a.nombres + ' ' + a.apellidos + ' (' + a.tipoVivienda + ')'}"></option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Observaciones y Condiciones de Entrega</label>
+                            <textarea name="observaciones" class="form-control form-control-sm" rows="2" placeholder="Ej: Se entrega con cartilla de vacunación al día y compromiso de 3 visitas veterinarias."></textarea>
+                        </div>
+
+                        <div class="alert alert-info py-2 small mb-3">
+                            <i class="bi bi-info-circle-fill me-1"></i>
+                            <strong>Efecto Transaccional:</strong> Al confirmar, la mascota pasará a estado <code>ADOPTADO</code>, se descontará el stock del kit sanitario y se generarán 3 controles post-adopción (30, 60 y 90 días).
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100 fw-semibold">
+                            <i class="bi bi-check2-all me-1"></i> Confirmar y Procesar Adopción (@Transactional)
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de Actas y Controles Generados -->
+    <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-header bg-white fw-bold text-success border-bottom">
+            <i class="bi bi-journal-check me-1"></i> Actas Registradas y Cronograma Post-Adopción Generado
+        </div>
+        <div class="card-body table-responsive">
+            <table class="table table-hover align-middle small mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>N° Acta</th>
+                        <th>Fecha</th>
+                        <th>Mascota Adoptada</th>
+                        <th>Adoptante</th>
+                        <th>Insumos Entregados (Kit)</th>
+                        <th>Controles Programados (30/60/90 días)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="acta : ${historialActas}">
+                        <td class="fw-bold text-success" th:text="${acta.numActa}"></td>
+                        <td th:text="${#temporals.format(acta.fechaAdopcion, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td>
+                            <span class="fw-semibold" th:text="${acta.mascota.nombre}"></span>
+                            <span class="badge bg-primary ms-1" th:text="${acta.mascota.estado}"></span>
+                        </td>
+                        <td th:text="${acta.adoptante.nombres + ' ' + acta.adoptante.apellidos}"></td>
+                        <td>
+                            <ul class="mb-0 ps-3">
+                                <li th:each="det : ${acta.detallesKit}" th:text="${det.cantidad + 'x ' + det.insumo.descripcion}"></li>
+                            </ul>
+                        </td>
+                        <td>
+                            <span th:each="ctrl : ${acta.controles}" class="badge bg-warning text-dark me-1 mb-1 d-inline-block"
+                                  th:text="${'Visita ' + ctrl.numeroVisita + ': ' + ctrl.fechaProgramada}"></span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(historialActas)}">
+                        <td colspan="6" class="text-center text-muted py-3">Aún no se han registrado actas de adopción.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

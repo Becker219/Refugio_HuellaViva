@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mantenimiento de Mascotas - Huella Viva</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div th:replace="~{menu :: navbar}"></div>
+
+<div class="container py-4">
+    <h4 class="fw-bold text-success mb-3"><i class="bi bi-heart-fill me-2"></i>Mantenimiento de Animales Rescatados</h4>
+
+    <div th:if="${exito}" class="alert alert-success alert-dismissible fade show py-2" role="alert">
+        <span th:text="${exito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show py-2" role="alert">
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-4">
+        <!-- Formulario de Registro / Edición -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-success text-white fw-semibold rounded-top-4">
+                    Datos del Animal Rescatado
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/mascotas/guardar}" th:object="${mascota}" method="post">
+                        <input type="hidden" th:field="*{idMascota}">
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Código (Ej: HV-M004)</label>
+                                <input type="text" th:field="*{codigoInterno}" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Nombre</label>
+                                <input type="text" th:field="*{nombre}" class="form-control form-control-sm" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Especie</label>
+                                <select th:field="*{especie.idEspecie}" class="form-select form-select-sm" required>
+                                    <option value="">-- Seleccione --</option>
+                                    <option th:each="e : ${listaEspecies}" th:value="${e.idEspecie}" th:text="${e.descripcion}"></option>
+                                </select>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Edad (meses)</label>
+                                <input type="number" th:field="*{edadMeses}" class="form-control form-control-sm" min="1" required>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold">Peso (kg)</label>
+                                <input type="number" step="0.01" th:field="*{peso}" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold">Tamaño</label>
+                                <select th:field="*{tamanio}" class="form-select form-select-sm">
+                                    <option value="Pequeño">Pequeño</option>
+                                    <option value="Mediano">Mediano</option>
+                                    <option value="Grande">Grande</option>
+                                </select>
+                            </div>
+                            <div class="col-4">
+                                <label class="form-label small fw-semibold">Energía</label>
+                                <select th:field="*{nivelEnergia}" class="form-select form-select-sm">
+                                    <option value="Bajo">Bajo</option>
+                                    <option value="Medio">Medio</option>
+                                    <option value="Alto">Alto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Fecha Rescate</label>
+                                <input type="date" th:field="*{fechaRescate}" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-semibold">Estado</label>
+                                <select th:field="*{estado}" class="form-select form-select-sm">
+                                    <option value="EN_REHABILITACION">EN REHABILITACIÓN</option>
+                                    <option value="APTO_ADOPCION">APTO ADOPCIÓN</option>
+                                    <option value="ADOPTADO">ADOPTADO</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold">Lugar de Rescate</label>
+                            <input type="text" th:field="*{lugarRescate}" class="form-control form-control-sm" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small fw-semibold">Historia Clínica / Observaciones</label>
+                            <textarea th:field="*{historia}" class="form-control form-control-sm" rows="2"></textarea>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-sm fw-semibold">
+                                <i class="bi bi-save me-1"></i> Guardar Datos
+                            </button>
+                            <a th:href="@{/mascotas}" class="btn btn-outline-secondary btn-sm">Limpiar Formulario</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabla de Listado -->
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-body table-responsive">
+                    <table class="table table-hover align-middle small mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Código</th>
+                                <th>Nombre</th>
+                                <th>Especie</th>
+                                <th>Edad / Peso</th>
+                                <th>Tamaño</th>
+                                <th>Estado</th>
+                                <th class="text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m : ${listaMascotas}">
+                                <td class="fw-bold" th:text="${m.codigoInterno}"></td>
+                                <td th:text="${m.nombre}"></td>
+                                <td th:text="${m.especie.descripcion}"></td>
+                                <td th:text="${m.edadMeses + ' m / ' + m.peso + ' kg'}"></td>
+                                <td th:text="${m.tamanio}"></td>
+                                <td>
+                                    <span class="badge"
+                                          th:classappend="${m.estado == 'APTO_ADOPCION' ? 'bg-success' : (m.estado == 'ADOPTADO' ? 'bg-primary' : 'bg-warning text-dark')}"
+                                          th:text="${m.estado}"></span>
+                                </td>
+                                <td class="text-center">
+                                    <a th:href="@{/mascotas/editar/{id}(id=${m.idMascota})}" class="btn btn-warning btn-sm py-0 px-2">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <a th:href="@{/mascotas/eliminar/{id}(id=${m.idMascota})}" 
+                                       onclick="return confirm('¿Seguro de eliminar este registro?')"
+                                       class="btn btn-danger btn-sm py-0 px-2">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

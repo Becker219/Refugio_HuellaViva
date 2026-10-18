@@ -1,0 +1,22 @@
+/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+### STS / Eclipse ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.metadata/
+
+### IntelliJ / NetBeans / VSCode ###
+.idea/
+*.iml
+
+### OS X / Windows ###
+.DS_Store
+Thumbs.db
